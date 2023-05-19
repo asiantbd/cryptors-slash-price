@@ -37,27 +37,28 @@ async fn price(
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    let framework: poise::FrameworkBuilder<Data, Box<dyn Error + Send + Sync>> = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
-            commands: vec![price()],
-            on_error: |error| Box::pin(async move { error!("{error}") }),
-            ..Default::default()
-        })
-        .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
-        .intents(serenity::GatewayIntents::non_privileged())
-        .setup(|ctx, _ready, framework| {
-            Box::pin(async move {
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                let sm = framework.shard_manager().clone();
-                tokio::spawn(async move {
-                    tokio::signal::ctrl_c()
-                        .await
-                        .expect("failed to listen for ctrl+c");
-                    sm.lock().await.shutdown_all().await;
-                });
-                Ok(Data {})
+    let framework: poise::FrameworkBuilder<Data, Box<dyn std::error::Error + Send + Sync>> =
+        poise::Framework::builder()
+            .options(poise::FrameworkOptions {
+                commands: vec![price()],
+                on_error: |error| Box::pin(async move { error!("{error}") }),
+                ..Default::default()
             })
-        });
+            .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
+            .intents(serenity::GatewayIntents::non_privileged())
+            .setup(|ctx, _ready, framework| {
+                Box::pin(async move {
+                    poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                    let sm = framework.shard_manager().clone();
+                    tokio::spawn(async move {
+                        tokio::signal::ctrl_c()
+                            .await
+                            .expect("failed to listen for ctrl+c");
+                        sm.lock().await.shutdown_all().await;
+                    });
+                    Ok(Data {})
+                })
+            });
 
     framework.run_autosharded().await.unwrap();
 }
