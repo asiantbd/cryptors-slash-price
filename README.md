@@ -6,7 +6,7 @@ This version is the Rust version of the C++ version [here](https://github.com/as
 
 ## Running the Bot
 ```shell
-$ docker run -d -e "DISCORD_TOKEN=token" ghcr.io/asiatbd/cryptors-price-slash-bot:v0.0.1
+$ docker run -d -e "DISCORD_TOKEN=token" ghcr.io/asiantbd/cryptors-price-slash-bot:v0.0.1
 ```
 
 --- 
